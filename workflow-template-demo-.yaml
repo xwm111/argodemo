@@ -1,0 +1,38 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: loops-
+spec:
+  entrypoint: cicd-pipeline
+  templates:
+   - name: cicd-pipeline
+     steps:
+        - - name: deploy-pre-prod
+            template: deploy
+        - - name: approval
+            template: approval
+        - - name: deploy-prod
+            template: deploy
+            when: '{{steps.approval.outputs.parameters.approve}} == YES'
+   - name: approval
+     suspend: {}
+     inputs:
+        parameters:
+           - name: approve
+             default: 'NO'
+             enum:
+                - 'YES'
+                - 'NO'
+     outputs:
+        parameters:
+           - name: approve
+             valueFrom:
+                supplied: {}
+   - name: deploy
+     container:
+        image: 'argoproj/argosay:v2'
+        command:
+           - /argosay
+        args:
+           - echo
+           - deploying
