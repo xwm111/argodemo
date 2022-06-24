@@ -1,0 +1,43 @@
+# 工作流组建模板规范
+# 1.日志记录输入参数
+# 2.参数业务处理
+# 3.依据逻辑调用应用镜像
+# 4.构建输出参数及日志
+# 5.发送业务处理通知
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  generateName: common_template-
+spec:
+  entrypoint: diamond
+  templates:
+  - name: diamond
+    dag:
+      tasks:
+      - name: A
+        template: echo
+        arguments:
+          parameters: [{name: message, value: A}]
+      - name: B
+        depends: "A"
+        template: echo
+        arguments:
+          parameters: [{name: message, value: B}]
+      - name: C
+        depends: "A"
+        template: echo
+        arguments:
+          parameters: [{name: message, value: C}]
+      - name: D
+        depends: "B && C"
+        template: echo
+        arguments:
+          parameters: [{name: message, value: D}]
+
+  - name: echo
+    inputs:
+      parameters:
+      - name: message
+    container:
+      image: alpine:3.7
+      command: [echo, "{{inputs.parameters.message}}"]
