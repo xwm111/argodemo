@@ -1,0 +1,33 @@
+# 引用外部的模版
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: ref-out-template
+spec:
+  templates:
+  - name: inner-steps
+    steps:
+    - - name: inner-hello1
+        templateRef:
+          name: standalone-print
+          template: whalesay-template
+        arguments:
+          parameters:
+          - name: message
+            value: "inner-hello1"
+    - - name: inner-hello2a
+        templateRef:
+          name: standalone-print
+          template: whalesay-template
+        arguments:
+          parameters:
+          - name: message
+            value: "inner-hello2a"
+      - name: inner-hello2b
+        templateRef:
+          name: standalone-print
+          template: whalesay-template
+        arguments:
+          parameters:
+          - name: message
+            value: "inner-hello2b"
